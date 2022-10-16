@@ -23,7 +23,7 @@ class Controls {
           this.reverse = true;
           break;
       }
-      console.table(this);
+      // console.table(this);
     });
     document.addEventListener("keyup", (e) => {
       switch (e.key) {
@@ -40,7 +40,7 @@ class Controls {
           this.reverse = false;
           break;
       }
-      console.table(this);
+      // console.table(this);
     });
   }
 }
