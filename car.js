@@ -12,7 +12,7 @@ class Car {
     this.angle = 0;
     this.damaged = false;
 
-    this.useBrain = controlType === "AI";
+    this.useBrain = controlType == "AI";
 
     if (controlType != "DUMMY") {
       this.sensor = new Sensor(this);
@@ -33,13 +33,12 @@ class Car {
         s == null ? 0 : 1 - s.offset
       );
       const outputs = NeuralNetwork.feedForward(offsets, this.brain);
-      console.log(outputs);
 
       if (this.useBrain) {
         this.controls.forward = outputs[0];
-        this.controls.reverse = outputs[1];
-        this.controls.left = outputs[2];
-        this.controls.right = outputs[3];
+        this.controls.left = outputs[1];
+        this.controls.right = outputs[2];
+        this.controls.reverse = outputs[3];
       }
     }
   }
@@ -60,7 +59,7 @@ class Car {
 
   #createPolygon() {
     const points = [];
-    const rad = Math.hypot(this.width / 2, this.height / 2);
+    const rad = Math.hypot(this.width, this.height) / 2;
     const alpha = Math.atan2(this.width, this.height);
     points.push({
       x: this.x - Math.sin(this.angle - alpha) * rad,
@@ -88,12 +87,14 @@ class Car {
     if (this.controls.reverse) {
       this.speed -= this.acceleration;
     }
+
     if (this.speed > this.maxSpeed) {
       this.speed = this.maxSpeed;
     }
     if (this.speed < -this.maxSpeed / 2) {
       this.speed = -this.maxSpeed / 2;
     }
+
     if (this.speed > 0) {
       this.speed -= this.friction;
     }
@@ -104,8 +105,8 @@ class Car {
       this.speed = 0;
     }
 
-    if (this.speed !== 0) {
-      const flip = this.speed < 0 ? -1 : 1;
+    if (this.speed != 0) {
+      const flip = this.speed > 0 ? 1 : -1;
       if (this.controls.left) {
         this.angle += 0.03 * flip;
       }
@@ -113,13 +114,14 @@ class Car {
         this.angle -= 0.03 * flip;
       }
     }
-    this.x -= this.speed * Math.sin(this.angle);
-    this.y -= this.speed * Math.cos(this.angle);
+
+    this.x -= Math.sin(this.angle) * this.speed;
+    this.y -= Math.cos(this.angle) * this.speed;
   }
 
-  draw(ctx, color) {
+  draw(ctx, color, drawSensor = false) {
     if (this.damaged) {
-      ctx.fillStyle = "grey";
+      ctx.fillStyle = "gray";
     } else {
       ctx.fillStyle = color;
     }
@@ -129,7 +131,8 @@ class Car {
       ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
     }
     ctx.fill();
-    if (this.sensor) {
+
+    if (this.sensor && drawSensor) {
       this.sensor.draw(ctx);
     }
   }
